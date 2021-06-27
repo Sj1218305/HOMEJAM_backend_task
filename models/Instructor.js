@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { isEmail } = require('validator');
 const bcrypt = require('bcrypt');
 
-const studentSchema = new mongoose.Schema({
+const instructorSchema = new mongoose.Schema({
   email: {
     type: String,
     required: [true, 'Please enter an email'],
@@ -17,13 +17,13 @@ const studentSchema = new mongoose.Schema({
   }
 });
 
-studentSchema.pre('save', async function(next) {
+instructorSchema.pre('save', async function(next) {
   const salt = await bcrypt.genSalt();
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-studentSchema.statics.login = async function(email, password) {
+instructorSchema.statics.login = async function(email, password) {
   const user = await this.findOne({ email });
   if (user) {
     const auth = await bcrypt.compare(password, user.password);
@@ -35,6 +35,6 @@ studentSchema.statics.login = async function(email, password) {
   throw Error('incorrect email');
 };
 
-const Student = mongoose.model('student', studentSchema);
+const Instructor = mongoose.model('instructor', instructorSchema);
 
-module.exports = Student;
+module.exports = Instructor;
