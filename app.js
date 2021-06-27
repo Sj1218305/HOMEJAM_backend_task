@@ -17,15 +17,14 @@ app.use(cookieParser());
 app.set('view engine', 'ejs');
 
 // database connection
-const dbURI = 'mongodb+srv://Shobhit:Jokers123@@cluster0.0kqcx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+const dbURI = 'mongodb://localhost:27017/ClassManagement'
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex:true })
   .then((result) => app.listen(3000))
   .catch((err) => console.log(err));
 
 // routes
-// app.get('*', checkUser);
+app.get('*', checkUser);
 app.get('/', (req, res) => res.send('home'));
-app.get('/test', requireAuth, (req, res) => res.send('you are logged in '));
 app.use(authStudent);
 app.use(authInstructor);
 app.use(Instructor);
