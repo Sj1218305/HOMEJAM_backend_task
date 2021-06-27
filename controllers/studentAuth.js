@@ -2,71 +2,103 @@ const Student = require('../models/Student');
 const jwt = require('jsonwebtoken');
 
 const handleErrors = (err) => {
-  console.log(err.message, err.code);
-  let errors = { email: '', password: '' };
+    console.log(err.message, err.code);
+    let errors = {
+        email: '',
+        password: ''
+    };
 
-  if (err.code === 11000) {
-    errors.email = 'that email is already registered';
+    if (err.code === 11000) {
+        errors.email = 'that email is already registered';
+        return errors;
+    }
+
+    if (err.message === 'incorrect email') {
+        errors.email = 'That email is not registered';
+    }
+
+    if (err.message === 'incorrect password') {
+        errors.password = 'That password is incorrect';
+    }
+
+    if (err.message.includes('student validation failed')) {
+        Object.values(err.errors).forEach(({
+            properties
+        }) => {
+            errors[properties.path] = properties.message;
+        });
+    }
+
     return errors;
-  }
-
-  if (err.message === 'incorrect email') {
-    errors.email = 'That email is not registered';
-  }
-
-  if (err.message === 'incorrect password') {
-    errors.password = 'That password is incorrect';
-  }
-
-  if (err.message.includes('student validation failed')) {
-    Object.values(err.errors).forEach(({ properties }) => {
-      errors[properties.path] = properties.message;
-    });
-  }
-
-  return errors;
 }
 
 const maxAge = 3 * 24 * 60 * 60;
 const createToken = (id) => {
-  return jwt.sign({ id }, 'Welcome to my secret world', {
-    expiresIn: maxAge
-  });
+    return jwt.sign({
+        id
+    }, 'Welcome to my secret world', {
+        expiresIn: maxAge
+    });
 };
 
 
 module.exports.signup_post = async (req, res) => {
-  const { username, email, password } = req.body;
+    const {
+        username,
+        email,
+        password
+    } = req.body;
 
-  try{
-  	const user = await Student.create({username,email,password});
-  	const token = createToken(user._id);
-  	res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-  	res.status(201).json({user: user._id});
-  }
-  catch(err){
-  	const errors = handleErrors(err);
-    res.status(400).json({ errors });
-  }
+    try {
+        const user = await Student.create({
+            username,
+            email,
+            password
+        });
+        const token = createToken(user._id);
+        res.cookie('jwt', token, {
+            httpOnly: true,
+            maxAge: maxAge * 1000
+        });
+        res.status(201).json({
+            user: user._id
+        });
+    } catch (err) {
+        const errors = handleErrors(err);
+        res.status(400).json({
+            errors
+        });
+    }
 }
 
 module.exports.login_post = async (req, res) => {
-  const { email, password } = req.body;
+    const {
+        email,
+        password
+    } = req.body;
 
-  try {
-    const user = await Student.login(email, password);
-    const token = createToken(user._id);
-    res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(200).json({ user: user._id });
-  } 
-  catch (err) {
-    const errors = handleErrors(err);
-    res.status(400).json({errors});
-  }
+    try {
+        const user = await Student.login(email, password);
+        const token = createToken(user._id);
+        res.cookie('jwt', token, {
+            httpOnly: true,
+            maxAge: maxAge * 1000
+        });
+        res.status(200).json({
+            user: user._id
+        });
+    } catch (err) {
+        const errors = handleErrors(err);
+        res.status(400).json({
+            errors
+        });
+    }
 
 }
 
 module.exports.logout_get = (req, res) => {
-  res.cookie('jwt', '', { maxAge: 1 });
-  res.redirect('/');
+    res.cookie('jwt', '', {
+        maxAge: 1
+    });
+    res.redirect('/');
 }
