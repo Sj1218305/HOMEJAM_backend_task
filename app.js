@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const authStudent = require('./routes/authStudent');
 const authInstructor = require('./routes/authInstructor');
+const Instructor = require('./routes/instructor');
+const Student = require('./routes/student');
 const cookieParser = require('cookie-parser');
 const { requireAuth, checkUser } = require('./middleware/authMiddleware');
 
@@ -26,3 +28,5 @@ app.get('/', (req, res) => res.send('home'));
 app.get('/test', requireAuth, (req, res) => res.send('you are logged in '));
 app.use(authStudent);
 app.use(authInstructor);
+app.use(Instructor);
+app.use(Student);
