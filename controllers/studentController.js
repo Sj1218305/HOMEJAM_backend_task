@@ -25,3 +25,23 @@ module.exports.getClasses = async(req,res) => {
 	    res.status(400).json({ errors });
 	}
 }
+
+module.exports.leaveClass = async(req,res) => {
+		const ClassId = req.params.classId;
+	try{
+		const classObject = await Class.findById({_id: classId});
+		const index = classObject.studentId.indexOf(req.user._id);
+		classObject.studentId.splice(index,1);
+		res.stats(201).json({
+			success: true,
+			message: "Class Left"
+		});
+	}
+	catch(err){
+		console.log(error);
+                res.json({
+                    success:false,
+                    error:error
+        });
+    }
+}

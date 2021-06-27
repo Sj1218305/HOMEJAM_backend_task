@@ -1,5 +1,6 @@
 const Instructor = require('../models/Instructor');
 const Class = require('../models/Class');
+const Student = require('../models/Student');
 
 module.exports.addClass = async(req,res) => {
 	const { title,metaData,subject } = req.body;
@@ -10,9 +11,12 @@ module.exports.addClass = async(req,res) => {
 		res.status(201).json({class: classObject._id});
 	}
 	catch(err){
-	  	const errors = handleErrors(err);
-	    res.status(400).json({ errors });
-  }
+		console.log(error);
+                res.json({
+                    success:false,
+                    error:error
+        });
+    }
 
 }
 
@@ -22,9 +26,12 @@ module.exports.getClasses = async(req,res) => {
 		res.status(201).json({classes: classes});
 	}
 	catch(err){
-		const errors = handleErrors(err);
-	    res.status(400).json({ errors });
-	}
+		console.log(error);
+                res.json({
+                    success:false,
+                    error:error
+        });
+    }
 }
 
 module.exports.updateClass = async(req,res) => {
@@ -35,9 +42,12 @@ module.exports.updateClass = async(req,res) => {
 	res.status(201).json({class: classObject._id});
 	}	
 	catch(err){
-		const errors = handleErrors(err);
-	    res.status(400).json({ errors });
-	}
+		console.log(error);
+                res.json({
+                    success:false,
+                    error:error
+        });
+    }
 }
 
 module.exports.deleteClass = async(req,res) => {
@@ -48,8 +58,53 @@ module.exports.deleteClass = async(req,res) => {
 			success: true,
 			message: "Class Deleted"
 		});
-	}catch(err){
-		const errors = handleErrors(err);
-	    res.status(400).json({ errors });
 	}
+	catch(err){
+		console.log(error);
+                res.json({
+                    success:false,
+                    error:error
+        });
+    }
+}
+
+module.exports.getStudents = async(req,res) => {
+	const classId = req.params.classId;
+	try{
+		const classObject = await Class.findById({_id: classId});
+		let students = [];
+		classObject.studentId.forEach((studentId) => {
+			const Student = Student.findById({_id: studentId});
+			students.push(Student.username);
+		})
+		res.status(201).json({students: students});
+	}
+	catch(err){
+		console.log(error);
+                res.json({
+                    success:false,
+                    error:error
+        });
+    }
+}
+
+module.exports.removeStudent = async(req,res) => {
+	const studentId = req.params.studentId;
+	const classId = req.params.classId;
+	try{
+		const classObject = await Class.findById({_id: classId});
+		const index = classObject.studentId.indexOf(studentId);
+		classObject.studentId.splice(index,1);
+		res.stats(201).json({
+			success: true,
+			message: "Student Removed"
+		});
+	}
+	catch(err){
+		console.log(error);
+                res.json({
+                    success:false,
+                    error:error
+        });
+    }
 }
